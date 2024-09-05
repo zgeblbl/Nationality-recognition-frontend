@@ -23,8 +23,8 @@ body {
   }
   
   video {
-    width: 480px;
-    height: 360px;
+    width: 640px;
+    height: 480px;
     border: 5px solid #203c5c;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
@@ -53,7 +53,8 @@ body {
   }
   
   .result-container {
-    padding: 20px;
+    width: 400px;
+    padding: 40px;
     background-color: #203c5c;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);

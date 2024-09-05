@@ -1,22 +1,41 @@
 const video = document.getElementById('camera');
 const captureButton = document.getElementById('capture');
-const resultText = document.getElementById('result');
+const resultElement = document.getElementById('result');
 
+// Access webcam
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => {
     video.srcObject = stream;
   })
   .catch(err => {
-    console.error("Camera access denied:", err);
+    console.error("Error accessing webcam: ", err);
   });
 
-// Capture image and send for prediction
+// Capture image and send it to the backend
 captureButton.addEventListener('click', () => {
-  // Here, you would capture the video frame, process it, and send it to your model
-  // After processing, display the result
-  resultText.textContent = "Processing...";
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const context = canvas.getContext('2d');
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  setTimeout(() => {
-    resultText.textContent = "Predicted Nationality: Turkish";
-  }, 2000);
+  // Convert the image to a data URL
+  const imageDataUrl = canvas.toDataURL('image/jpeg');
+  
+  // Send the image data to the backend for prediction
+  fetch('http://localhost:5000/predict', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ image: imageDataUrl })
+  })
+  .then(response => response.json())
+  .then(data => {
+    resultElement.innerText = `Prediction: ${data.prediction}`;
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    resultElement.innerText = "Error processing prediction.";
+  });
 });
