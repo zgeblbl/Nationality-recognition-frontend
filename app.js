@@ -6,38 +6,55 @@ const resultElement = document.getElementById('result');
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => {
     video.srcObject = stream;
-    video.play();  // Ensure video is playing
   })
   .catch(err => {
     console.error("Error accessing webcam: ", err);
-    resultElement.innerText = "Error accessing webcam.";
   });
 
-// Capture image and send it to the backend
-captureButton.addEventListener('click', () => {
+// Function to capture an image from the video
+function captureImage() {
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const context = canvas.getContext('2d');
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg');  // Return base64 encoded image
+}
 
-  // Convert the image to a data URL
-  const imageDataUrl = canvas.toDataURL('image/jpeg');
+// Function to capture images with delay
+function captureImagesWithDelay(numImages, delay, callback) {
+  const images = [];
+  
+  function capture(index) {
+    if (index < numImages) {
+      images.push(captureImage());
+      setTimeout(() => capture(index + 1), delay);
+    } else {
+      callback(images);
+    }
+  }
 
-  // Send the image data to the backend for prediction
-  fetch('http://localhost:5000/predict', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ image: imageDataUrl })
-  })
-  .then(response => response.json())
-  .then(data => {
-    resultElement.innerText = `Prediction: ${data.prediction}`;
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    resultElement.innerText = "Error processing prediction.";
+  capture(0);
+}
+
+// Capture 20 images with 0.1 sec delay and send to backend
+captureButton.addEventListener('click', () => {
+  captureImagesWithDelay(20, 100, images => {
+    // Send images to backend
+    fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ images: images })
+    })
+    .then(response => response.json())
+    .then(data => {
+      resultElement.innerText = `Prediction: ${data.prediction}`;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      resultElement.innerText = "Error processing prediction.";
+    });
   });
 });
