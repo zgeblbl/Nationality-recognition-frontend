@@ -6,8 +6,12 @@ body {
     min-height: 100vh;
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #dfdfdf;
+    /*background-color: #dcdcdc;*/
+    background: url('bg-art-5.png') repeat;
+    background-size: 350px 350px;
+    position: relative;
   }
+ 
   
   .container {
     display: flex;
@@ -58,6 +62,12 @@ body {
     background-color: #203c5c;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
   
   h2 {
@@ -90,5 +100,42 @@ body {
     font-size: 16px;
     font-weight: bold;
     color: #203c5c;
+  }
+  #result {
+    font-size: 18px; /* Default font size for waiting text */
+    font-weight: normal;
+    color: #dfdfdf;
+  }
+  
+  .prediction-received {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #dfdfdf;
+  }
+  .loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+  }
+  
+  .loading-message {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .countdown {
+    font-size: 48px;
+    font-weight: bold;
   }
   
