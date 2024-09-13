@@ -4,25 +4,6 @@ const resultElement = document.getElementById('result');
 const loadingScreen = document.getElementById('loading');
 const countdownElement = document.getElementById('countdown');
 
-// Load face models
-async function loadFaceModels() {
-  try {
-    await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-    await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-    await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-    console.log("Models loaded successfully.");
-  } catch (error) {
-    console.error("Error loading models: ", error);
-  }
-}
-
-loadFaceModels();
-
-// Detect face in image
-async function detectFace(image) {
-  const detections = await faceapi.detectAllFaces(image, new faceapi.TinyFaceDetectorOptions());
-  return detections.length > 0;
-}
 
 // Access webcam
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -41,14 +22,8 @@ async function captureImage() {
   const context = canvas.getContext('2d');
   context.drawImage(video, 0, 0, canvas.width, canvas.height);
   
-  const image = await faceapi.bufferToImage(canvas.toBuffer('image/jpeg'));
-  const hasFace = await detectFace(image);
-
-  if (hasFace) {
-    return canvas.toDataURL('image/jpeg'); // Return base64 encoded image
-  } else {
-    return null; // No face detected
-  }
+  return canvas.toDataURL('image/jpeg'); // Return base64 encoded image
+  
 }
 
 // Function to capture images and send them to the backend
@@ -75,7 +50,7 @@ async function captureAndSendImages(numImages, delay) {
     }
 
     // Batch send images every 5 captures or after final image
-    if (images.length % 5 === 0 || i === numImages - 1) {
+    if (i === numImages - 1) {
       await sendImages(images.splice(0, 5));  // Send and clear batch
     }
 
@@ -107,11 +82,15 @@ async function sendImages(imagesBatch) {
   } catch (error) {
     console.error('Error:', error);
     resultElement.innerText = "Error processing prediction.";
+  } finally {
+    // Hide loading screen after prediction is processed
+    loadingScreen.style.display = 'none';
   }
 }
 
 // Event listener for capture button
 captureButton.addEventListener('click', async () => {
+  resultElement.innerText = "";
   captureButton.disabled = true;
   await captureAndSendImages(20, 200);  // Capture 20 images with a 200ms delay
 
